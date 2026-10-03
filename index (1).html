@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MEDTRACE – Secure Medical Record Access</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js" defer></script>
+<style>
+:root{--bg:#f3f6fa;--card:#fff;--ink:#0b1f3a;--mute:#5b6b82;--line:#e1e8f0;--blue:#1560bd;--blue2:#e8f1fc;--teal:#0e9aa7;--teal2:#e3f6f7;--green:#12805c;--green2:#e2f5ed;--amber:#a15c00;--amber2:#fff3dc;--red:#b42318;--red2:#fde8e6;--sh:0 1px 2px rgba(11,31,58,.06),0 6px 20px rgba(11,31,58,.06);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1424;--card:#111f35;--ink:#e8eef7;--mute:#9bacc2;--line:#223452;--blue:#6fb0ff;--blue2:#14294a;--teal:#4cd0db;--teal2:#10343a;--green:#4fd1a1;--green2:#0f3326;--amber:#ffc266;--amber2:#3a2c0e;--red:#ff8f85;--red2:#3d1714}}
+:root[data-theme="dark"]{--bg:#0a1424;--card:#111f35;--ink:#e8eef7;--mute:#9bacc2;--line:#223452;--blue:#6fb0ff;--blue2:#14294a;--teal:#4cd0db;--teal2:#10343a;--green:#4fd1a1;--green2:#0f3326;--amber:#ffc266;--amber2:#3a2c0e;--red:#ff8f85;--red2:#3d1714}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:20px}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:700;background:var(--blue);color:#fff;display:inline-flex;gap:8px;align-items:center;justify-content:center;min-height:44px}
+:root[data-theme="dark"] .btn{color:#06223f}
+.btn.sec{background:var(--blue2);color:var(--blue)}.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}.btn.red{background:var(--red);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.pill{display:inline-flex;gap:6px;align-items:center;border-radius:99px;padding:3px 11px;font-size:13px;font-weight:700;background:var(--teal2);color:var(--teal)}
+.pill.g{background:var(--green2);color:var(--green)}.pill.a{background:var(--amber2);color:var(--amber)}.pill.r{background:var(--red2);color:var(--red)}
+.mute{color:var(--mute)}h1,h2,h3{margin:0;letter-spacing:-.01em}h1{font-size:28px}h2{font-size:22px}h3{font-size:17px}
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(900px 400px at 80% -10%,var(--teal2),transparent),radial-gradient(700px 400px at -10% 110%,var(--blue2),transparent),var(--bg)}
+.lbox{width:100%;max-width:420px}.brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--teal));display:grid;place-items:center;color:#fff}
+.brand b{font-size:26px;letter-spacing:.06em;font-weight:800}
+label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+input,select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);min-height:46px}
+input:focus{border-color:var(--teal)}
+.err{background:var(--red2);color:var(--red);border-radius:12px;padding:10px 14px;font-weight:600;margin-top:14px;display:flex;gap:8px}
+.sec-note{display:flex;gap:6px;align-items:center;color:var(--mute);font-size:13px;justify-content:center;margin-top:16px}
+.hint{font-size:13px;background:var(--blue2);color:var(--blue);padding:8px 12px;border-radius:10px;margin-top:14px}
+/* shell */
+#app{display:none;min-height:100vh}
+aside{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--card);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
+aside .brand{padding:0 8px 18px}aside .brand b{font-size:20px}aside .logo{width:36px;height:36px;border-radius:10px}
+.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;border:0;background:none;font-weight:600;color:var(--mute);text-align:left;width:100%}
+.nav.on{background:var(--blue2);color:var(--blue)}.nav:hover{background:var(--blue2)}
+main{margin-left:230px;padding:0 28px 40px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+.top .r{display:flex;gap:8px;align-items:center}.ib{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;position:relative}
+.dot{position:absolute;top:9px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--red)}
+.secbar{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--green);font-weight:600;margin-bottom:18px}.secbar span{display:flex;gap:5px;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.idcard{text-align:center;padding:30px 24px}.ico{width:76px;height:76px;border-radius:22px;display:grid;place-items:center;margin:0 auto 14px;background:var(--blue2);color:var(--blue)}.ico svg{width:38px;height:38px}.ico.t{background:var(--teal2);color:var(--teal)}
+nav.bot{display:none}
+.tabs{display:flex;gap:6px;background:var(--blue2);padding:5px;border-radius:14px;width:fit-content;max-width:100%;overflow-x:auto}
+.tab{border:0;background:none;padding:9px 16px;border-radius:10px;font-weight:700;color:var(--mute);white-space:nowrap}.tab.on{background:var(--card);color:var(--blue);box-shadow:var(--sh)}
+.scan{width:260px;height:260px;margin:18px auto;border-radius:20px;background:#0b1f3a;position:relative;overflow:hidden;display:grid;place-items:center;color:#7fb8ff}
+.scan .c{position:absolute;width:40px;height:40px;border:4px solid var(--teal);}
+.c.a{top:22px;left:22px;border-right:0;border-bottom:0;border-radius:10px 0 0 0}.c.b{top:22px;right:22px;border-left:0;border-bottom:0;border-radius:0 10px 0 0}.c.d{bottom:22px;left:22px;border-right:0;border-top:0;border-radius:0 0 0 10px}.c.e{bottom:22px;right:22px;border-left:0;border-top:0;border-radius:0 0 10px 0}
+.line{position:absolute;left:30px;right:30px;height:3px;background:var(--teal);box-shadow:0 0 14px var(--teal);animation:sc 2s ease-in-out infinite alternate}
+@keyframes sc{from{top:34px}to{top:222px}}
+.fp{width:150px;height:150px;border-radius:50%;margin:18px auto;display:grid;place-items:center;background:var(--teal2);color:var(--teal);border:3px solid var(--teal)}.fp svg{width:80px;height:80px}.fp.go{animation:pu 1s infinite}
+@keyframes pu{50%{box-shadow:0 0 0 14px rgba(14,154,167,.18)}}
+.bar{height:10px;background:var(--line);border-radius:9px;overflow:hidden;max-width:300px;margin:12px auto}.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .2s}
+.ok{width:84px;height:84px;border-radius:50%;background:var(--green2);color:var(--green);display:grid;place-items:center;margin:10px auto}.ok svg{width:44px;height:44px;stroke-width:2.6}
+.center{text-align:center}
+.pt{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));color:#fff;display:grid;place-items:center;font-weight:800;font-size:22px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:16px}.facts div{background:var(--bg);border-radius:12px;padding:10px 12px}.facts small{display:block;color:var(--mute);font-size:12px;font-weight:600}.facts b{font-size:15px}
+.rep{display:flex;flex-direction:column;gap:6px}.rep .row{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}.list li{display:flex;gap:10px;align-items:flex-start}
+.hl{border-left:4px solid var(--amber);background:var(--amber2);padding:10px 14px;border-radius:0 12px 12px 0}.hl.r{border-color:var(--red);background:var(--red2)}.hl.g{border-color:var(--green);background:var(--green2)}
+.disc{display:flex;gap:8px;background:var(--blue2);color:var(--blue);padding:10px 14px;border-radius:12px;font-weight:600;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:15px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-size:13px}
+.mrow{display:flex;gap:8px;margin-bottom:10px}.mrow button{flex:none}
+.skel{height:16px;border-radius:8px;background:linear-gradient(90deg,var(--line),var(--bg),var(--line));background-size:200% 100%;animation:sk 1.2s infinite;margin:12px 0}@keyframes sk{to{background-position:-200% 0}}
+.empty{text-align:center;padding:40px 20px}.empty .ico{background:var(--bg);color:var(--mute)}
+dialog{border:0;border-radius:18px;padding:24px;max-width:440px;width:calc(100% - 32px);background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}dialog::backdrop{background:rgba(5,15,30,.55)}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-weight:600;z-index:20}
+.mt{margin-top:18px}.flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.sp{justify-content:space-between}
+@media(max-width:820px){aside{display:none}main{margin:0;padding:0 16px 96px}.grid2{grid-template-columns:1fr}h1{font-size:23px}
+nav.bot{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:9}
+nav.bot button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--mute);padding:6px 0;min-height:48px}nav.bot button.on{color:var(--blue)}
+.hide-m{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+.qrw{background:#fff;border-radius:14px;padding:8px;display:inline-block;line-height:0;border:1px solid var(--line)}.qrw svg{width:200px;height:200px;max-width:100%}.scan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.demo{border-top:1px dashed var(--line);margin-top:18px;padding-top:14px}.demo .flex,.fl-c{justify-content:center}
+</style></head>
+<body>
+<section id="login"><div class="lbox card">
+ <div class="brand"><div class="logo" data-i="shield"></div><b>MEDTRACE</b></div>
+ <p class="mute" style="margin:0 0 4px">Secure Medical Record Access</p>
+ <div class="tabs" role="tablist" style="width:100%;margin-top:12px"><button class="tab on" id="ltd" data-lt="doctor" style="flex:1">Doctor</button><button class="tab" id="ltp" data-lt="patient" style="flex:1">Patient</button></div>
+ <div id="fdoc"><div id="lerr"></div>
+ <label for="nmr">NMR No.</label><input id="nmr" autocomplete="off" placeholder="e.g. 12345">
+ <label for="dn">Doctor Name</label><input id="dn" autocomplete="off" placeholder="e.g. Dr. Meera Nair">
+ <label for="pw">Password</label><input id="pw" type="password" placeholder="Enter password">
+ <button class="btn sec" type="button" style="width:100%;margin-top:16px" id="fill" data-i="check" data-t="Fill Demo Credentials"></button>
+ <button class="btn" style="width:100%;margin-top:12px" id="lb">Login</button>
+ <p class="center" style="margin:14px 0 0"><a href="#" id="fp" style="color:var(--blue);font-weight:600">Forgot Password?</a></p>
+ <div class="hint">Prototype demo: NMR <b>12345</b> · Name <b>Dr. Meera Nair</b> · Password <b>medtrace</b></div>
+ <div class="sec-note"><span data-i="lock"></span>Authorized doctor access only · Fictional data</div></div>
+ <div id="fpat" hidden><div id="perr"></div>
+ <label for="pid">Patient ID</label><input id="pid" autocomplete="off" placeholder="e.g. MT-10245">
+ <label for="ppw">Password</label><input id="ppw" type="password" placeholder="Enter password">
+ <button class="btn sec" type="button" style="width:100%;margin-top:16px" id="pfill" data-i="check" data-t="Fill Demo Credentials"></button>
+ <button class="btn" style="width:100%;margin-top:12px" id="plb">Patient Login</button>
+ <div class="hint">Prototype demo: Patient ID <b>MT-10245</b> · Password <b>patient123</b><br>Other demo IDs: MT-10318 · MT-10472</div>
+ <div class="sec-note"><span data-i="lock"></span>Your records are private · Fictional data</div></div>
+</div></section>
+
+<div id="app">
+<aside><div class="brand"><div class="logo" data-i="shield"></div><b>MEDTRACE</b></div><div id="side"></div></aside>
+<main>
+ <header class="top"><div><div class="mute" style="font-size:13px;font-weight:600">MEDTRACE</div><h2 id="ttl">Doctor Dashboard</h2></div>
+ <div class="r"><span class="hide-m" style="text-align:right;line-height:1.2"><b id="whoN">Dr. Meera Nair</b><br><small class="mute" id="whoS">NMR 12345</small></span>
+ <button class="ib" id="bell" aria-label="Notifications" data-i="bell"></button><button class="ib" id="lo" aria-label="Log out" data-i="out"></button></div></header>
+ <div class="secbar"><span><i data-i="lock"></i>Secure Session</span><span><i data-i="shield"></i>Patient data encrypted</span><span><i data-i="doc"></i><em id="sec3" style="font-style:normal">Authorized doctor access only</em></span></div>
+ <div id="view"></div>
+</main>
+<nav class="bot" id="bot"></nav>
+</div>
+
+<dialog id="dlg"></dialog>
+<script>
+const IC={shield:'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',bell:'<path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 21h4"/>',out:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',qr:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h3v3h-3zM20 14v6h-3M14 20h0"/>',fp:'<path d="M12 4a7 7 0 00-7 7v2M12 8a3 3 0 00-3 3v4a8 8 0 01-1 4M12 11v4c0 2 .5 4 1.5 5.5M16 9a5 5 0 00-.5-1M19 12v1c0 3-.5 5-2 7M8.5 4.8A7 7 0 0119 11"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/>',users:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M16 4.5a3.5 3.5 0 010 7M18 14c2.5.6 4 2.5 4 5"/>',doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',ai:'<path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8zM18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',pill:'<rect x="3" y="9" width="18" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.5 8.5l5 7"/>',warn:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h0"/>',home:'<path d="M3 11l9-8 9 8M5 10v10h14V10"/>',check:'<path d="M5 12l5 5 9-10"/>',steth:'<path d="M6 3v6a4 4 0 008 0V3M10 13v2a5 5 0 0010 0v-1"/><circle cx="20" cy="12" r="2"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',cam:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const $=s=>document.querySelector(s);
+function hydrate(r=document){r.querySelectorAll('[data-i]').forEach(e=>{e.innerHTML=ic(e.dataset.i)+(e.dataset.t||'');})}
+const NAV=[['dash','Dashboard','home'],['pts','Patients','users'],['reps','Medical Reports','doc'],['sum','AI Summary','ai'],['drug','Drug Checker','pill'],['prof','Profile','user']];
+const TITLES={dash:'Doctor Dashboard',verify:'Verify Patient',rec:'Patient Record',pts:'Patients',reps:'Medical Reports',sum:'AI Medical Report Summary',drug:'AI Drug Checker',prof:'Profile',pprof:'My Profile',preps:'My Medical Reports'};
+const A={name:'Arjun Kumar',id:'MT-10245',age:45,sex:'Male',bg:'O+',last:'28 September 2026',allergies:[['Penicillin','Skin rash, moderate'],['Sulfonamides','Hives, mild']],
+meds:[['Warfarin','5 mg once daily','Atrial fibrillation'],['Metformin','500 mg twice daily','Type 2 diabetes'],['Atorvastatin','20 mg at night','High cholesterol'],['Amlodipine','5 mg once daily','Hypertension']],
+hist:[['2024','Type 2 diabetes mellitus diagnosed'],['2025','Atrial fibrillation – warfarin started'],['2026','Hypertension, on amlodipine'],['Mar 2026','Cataract screening – no surgery advised']],
+reps:[['Complete Blood Count','28 Sep 2026','Dr. R. Iyer · Sunrise General Hospital','Lab report'],['HbA1c & Fasting Glucose','28 Sep 2026','Dr. S. Menon · Sunrise General Hospital','Lab report'],['INR / Coagulation Profile','28 Sep 2026','Dr. R. Iyer · Sunrise General Hospital','Lab report'],['Chest X-ray','14 Jun 2026','Dr. A. Das · City Imaging Centre','Radiology'],['Lipid Profile','14 Jun 2026','Dr. S. Menon · Sunrise General Hospital','Lab report']]};
+
+const RR=(a,b,c,d,rows)=>[a,b,c,d,rows];
+Object.assign(A,{qr:'MEDTRACE:MT-10245:A7K2Q9',cond:['Type 2 diabetes mellitus','Atrial fibrillation','Hypertension'],alerts:[['','<b>Allergy:</b> Penicillin, Sulfonamides'],['r','<b>Anticoagulant:</b> on Warfarin – check before adding drugs']],rx:[['28 Sep 2026','Warfarin 5 mg','Dr. R. Iyer'],['28 Sep 2026','Metformin 500 mg','Dr. S. Menon'],['14 Jun 2026','Atorvastatin 20 mg','Dr. S. Menon']],
+sum:{f:['Glucose control above target; HbA1c 8.1%.','INR 3.6 – higher than the usual therapeutic range for atrial fibrillation (2.0–3.0).','Haemoglobin 12.9 g/dL, mildly below reference range.'],a:[['r','<b>INR 3.6</b> (ref 2.0–3.0) – high'],['','<b>HbA1c 8.1%</b> (target &lt;7%)'],['','<b>Hb 12.9 g/dL</b> (ref 13.0–17.0)']],c:[['INR','2.7','<b>3.6</b> ↑'],['HbA1c','7.6%','<b>8.1%</b> ↑'],['LDL','128','118 ↓']],cond:'Type 2 diabetes, atrial fibrillation, hypertension (as documented in the record).',medh:'Warfarin since 2025; Metformin, Atorvastatin and Amlodipine ongoing. No dose changes documented since June 2026.',att:['Review INR trend and warfarin dosing.','Review glycaemic control plan.','Confirm cause of mild anaemia is evaluated.']}});
+const PATIENTS=[A,
+{name:'Priya Sharma',id:'MT-10318',age:32,sex:'Female',bg:'B+',last:'28 September 2026',qr:'MEDTRACE:MT-10318:X4M8R1',allergies:[['Latex','Skin rash, mild'],['Ibuprofen','Stomach upset, moderate']],
+meds:[['Levothyroxine','50 mcg once daily','Hypothyroidism'],['Ferrous sulfate','200 mg once daily','Iron deficiency anaemia'],['Sumatriptan','50 mg as needed','Migraine']],
+hist:[['2023','Hypothyroidism diagnosed'],['2025','Iron deficiency anaemia – iron started'],['Mar 2026','Migraine review – MRI normal']],
+reps:[RR('Thyroid Profile','28 Sep 2026','Dr. K. Rao · Lakeview Clinic','Lab report',[['TSH','6.8 mIU/L','0.4–4.0'],['Free T4','0.9 ng/dL','0.8–1.8']]),RR('Complete Blood Count','28 Sep 2026','Dr. K. Rao · Lakeview Clinic','Lab report',[['Hb','10.9 g/dL','12.0–15.5'],['WBC','6.4 ×10³/µL','4.0–11.0'],['Platelets','262 ×10³/µL','150–400']]),RR('Iron Studies','14 Jun 2026','Dr. K. Rao · Lakeview Clinic','Lab report',[['Ferritin','9 ng/mL','15–150'],['Serum iron','48 µg/dL','60–170']]),RR('MRI Brain','14 Jun 2026','Dr. N. Pillai · City Imaging Centre','Radiology',[['Finding','No acute abnormality','—']])],
+cond:['Hypothyroidism','Iron deficiency anaemia','Migraine'],alerts:[['','<b>Allergy:</b> Latex, Ibuprofen'],['r','<b>NSAID allergy:</b> avoid ibuprofen-type pain relief']],rx:[['28 Sep 2026','Levothyroxine 50 mcg','Dr. K. Rao'],['28 Sep 2026','Ferrous sulfate 200 mg','Dr. K. Rao']],
+sum:{f:['TSH 6.8 mIU/L is above range – thyroid dose may need review.','Haemoglobin 10.9 g/dL, below reference range.','Ferritin low, consistent with iron deficiency.'],a:[['r','<b>TSH 6.8 mIU/L</b> (ref 0.4–4.0) – high'],['','<b>Hb 10.9 g/dL</b> (ref 12.0–15.5)'],['','<b>Ferritin 9 ng/mL</b> (ref 15–150)']],c:[['TSH','5.2','<b>6.8</b> ↑'],['Hb','11.4','<b>10.9</b> ↓'],['Ferritin','12','<b>9</b> ↓']],cond:'Hypothyroidism, iron deficiency anaemia, migraine (as documented in the record).',medh:'Levothyroxine since 2023; iron since 2025. No dose changes documented since June 2026.',att:['Review levothyroxine dose against TSH trend.','Review response to iron therapy.','Avoid ibuprofen-type drugs (documented allergy).']}},
+{name:'Rahul Verma',id:'MT-10472',age:58,sex:'Male',bg:'A-',last:'28 September 2026',qr:'MEDTRACE:MT-10472:B9T3W6',allergies:[['Aspirin','Wheezing, moderate'],['Shellfish','Hives, mild']],
+meds:[['Budesonide-formoterol','2 puffs twice daily','Asthma'],['Salbutamol inhaler','As needed','Asthma relief'],['Losartan','50 mg once daily','Hypertension'],['Rosuvastatin','10 mg at night','High cholesterol']],
+hist:[['2019','Asthma diagnosed'],['2022','Right knee replacement'],['2025','Hypertension – losartan started'],['Jun 2026','Lipid and kidney review']],
+reps:[RR('Spirometry','28 Sep 2026','Dr. V. Shah · Harbour Hospital','Lab report',[['FEV1','72% predicted','&gt;80%'],['FEV1/FVC','0.68','&gt;0.70']]),RR('Lipid Profile','28 Sep 2026','Dr. V. Shah · Harbour Hospital','Lab report',[['LDL','132 mg/dL','&lt;100'],['HDL','42 mg/dL','&gt;40']]),RR('Kidney Function','14 Jun 2026','Dr. V. Shah · Harbour Hospital','Lab report',[['Creatinine','1.1 mg/dL','0.7–1.3'],['eGFR','78','&gt;60']]),RR('Chest X-ray','14 Jun 2026','Dr. A. Das · City Imaging Centre','Radiology',[['Finding','Mild hyperinflation','—']])],
+cond:['Asthma','Hypertension','High cholesterol'],alerts:[['','<b>Allergy:</b> Aspirin, Shellfish'],['r','<b>Aspirin allergy:</b> avoid aspirin-containing drugs']],rx:[['28 Sep 2026','Budesonide-formoterol','Dr. V. Shah'],['28 Sep 2026','Losartan 50 mg','Dr. V. Shah'],['14 Jun 2026','Rosuvastatin 10 mg','Dr. V. Shah']],
+sum:{f:['FEV1 72% predicted with FEV1/FVC 0.68 – airflow limitation persists.','LDL 132 mg/dL above target.','Kidney function within reference range.'],a:[['r','<b>FEV1/FVC 0.68</b> (ref &gt;0.70) – low'],['','<b>LDL 132 mg/dL</b> (target &lt;100)'],['','<b>FEV1 72%</b> (ref &gt;80%)']],c:[['FEV1 %','75','<b>72</b> ↓'],['LDL','141','<b>132</b> ↓'],['Creatinine','1.1','1.1']],cond:'Asthma, hypertension, high cholesterol; right knee replacement 2022.',medh:'Inhalers long-term; Losartan since 2025; Rosuvastatin ongoing. No dose changes documented since June 2026.',att:['Review asthma control and inhaler technique.','Review lipid-lowering dose.','Aspirin allergy – avoid aspirin-containing drugs.']}}];
+const MAT={"MT-10245": ["111111100000001111111", "100000101100001000001", "101110100011101011101", "101110101000101011101", "101110100110001011101", "100000101101001000001", "111111101010101111111", "000000000100000000000", "111110111100110101010", "010101000001101111100", "011110100100000110111", "000010001111010111001", "000000101000100100111", "000000001101100001011", "111111101011000011100", "100000100110101010100", "101110101010111001011", "101110101101110000100", "101110101000100000000", "100000101101000001101", "111111101001001101100"], "MT-10318": ["111111100011001111111", "100000100010001000001", "101110100101101011101", "101110101010001011101", "101110101101001011101", "100000100001001000001", "111111101010101111111", "000000000000000000000", "110001110100100011000", "000110000110000001101", "100011110100000110111", "101101000101010011001", "111100101101011111100", "000000001010100101011", "111111101101100011100", "100000101111100100101", "101110100100011001011", "101110100101110100100", "101110100111111011011", "100000101000110101101", "111111101111100101100"], "MT-10472": ["111111100010001111111", "100000101000101000001", "101110100101001011101", "101110101011101011101", "101110100100101011101", "100000101101101000001", "111111101010101111111", "000000000101100000000", "111110111100110101010", "101000000101001111100", "001011101001000110111", "000000001001010111001", "101110101010100100111", "000000001110000001011", "111111101111100011100", "100000100010101010100", "101110101010011001011", "101110101110110000100", "101110101010000000000", "100000101101110001101", "111111101011010101100"]};PATIENTS.forEach(p=>p.qm=MAT[p.id]);let P=A;
+const PNAV=[['pprof','My Profile','user'],['preps','My Reports','doc']];
+const DEF=[['INR','3.6','2.0–3.0'],['HbA1c','8.1%','&lt;7%'],['Hb','12.9','13.0–17.0']];
+let S={role:'doctor',last:A,lastD:'28 Sep 2026',tab:'Overview',vtab:'qr',n:0,nIds:[],can:false,patient:false,meds:['Warfarin','Aspirin'],res:null,loading:false,v:'dash'};
+function go(v){S.v=v;if(v==='verify'){S.vtab=S.vtab||'qr';}render();window.scrollTo(0,0)}
+function render(){
+ stopCam();const NV=S.role==='patient'?PNAV:NAV;const act={verify:'dash',rec:'pts'}[S.v]||S.v;
+ const nav=NV.map(([k,l,i])=>`<button class="nav ${act===k?'on':''}" data-go="${k}">${ic(i)}<span>${l}</span></button>`).join('');
+ $('#side').innerHTML=nav;
+ $('#bot').innerHTML=NV.map(([k,l,i])=>`<button class="${act===k?'on':''}" data-go="${k}">${ic(i)}${l.replace('Medical ','')}</button>`).join('');
+ $('#ttl').textContent=TITLES[S.v];{const pt=S.role==='patient';$('#whoN').textContent=pt?P.name:'Dr. Meera Nair';$('#whoS').textContent=pt?P.id:'NMR 12345';$('#sec3').textContent=pt?'Only you and verified doctors can view this':'Authorized doctor access only'}$('#view').innerHTML=V[S.v]();hydrate($('#view'));
+ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+}
+const needPt=(t,f)=>`<div class="card empty"><div class="ico">${ic('user')}</div><h3>No patient verified</h3><p class="mute">Verify a patient by QR code or biometrics to open ${t}.</p><button class="btn" data-go="verify">${ic('qr')}Verify patient</button></div>`;
+const patCard=()=>`<div class="card"><div class="pt"><div class="av">${ini(P)}</div><div style="flex:1;min-width:180px"><h2>${P.name}</h2><span class="pill g">${ic('check')}Identity verified</span></div>
+<button class="btn sec" data-act="sum">${ic('ai')}AI Summarisation</button><button class="btn sec" data-act="drug">${ic('pill')}AI Drug Checker</button></div>
+<div class="facts"><div><small>Patient ID</small><b>${P.id}</b></div><div><small>Age</small><b>${P.age}</b></div><div><small>Gender</small><b>${P.sex}</b></div><div><small>Blood Group</small><b>${P.bg}</b></div><div><small>Last Visit</small><b>${P.last}</b></div></div></div>`;
+const repCards=()=>`<div class="grid3">${P.reps.map((r,i)=>`<div class="card rep"><div class="row"><span class="pill">${r[3]}</span><span class="mute" style="font-size:13px">${r[1]}</span></div><h3>${r[0]}</h3><div class="mute" style="font-size:14px">${r[2]}</div><button class="btn sec mt" data-rep="${i}">${ic('doc')}View Report</button></div>`).join('')}</div>`;
+const V={
+dash:()=>`<h1>Patient Identification</h1><p class="mute">Choose how to identify the patient in front of you.</p>
+<div class="grid2 mt"><div class="card idcard"><div class="ico">${ic('qr')}</div><h3>QR Code</h3><p class="mute">Scan the QR code associated with a patient's medical record.</p><button class="btn" data-vt="qr">Scan Patient QR Code</button></div>
+<div class="card idcard"><div class="ico t">${ic('fp')}</div><h3>Biometric</h3><p class="mute">Securely identify the patient using biometric verification.</p><button class="btn" data-vt="bio">Verify Patient Biometrics</button></div></div>
+<div class="card mt flex sp"><div><b>Recent activity</b><div class="mute" style="font-size:14px">Last record opened: ${S.last.name} (${S.last.id}) · ${S.lastD}</div></div><span class="pill g">${ic('shield')}All access logged</span></div>`,
+verify:()=>{const q=S.vtab==='qr';return `<div class="card center" style="max-width:560px;margin:0 auto"><h1>Verify Patient</h1>
+<div class="tabs mt" style="margin-inline:auto"><button class="tab ${q?'on':''}" data-vt="qr">QR Code</button><button class="tab ${q?'':'on'}" data-vt="bio">Biometric</button></div><div id="vbody">${
+q?`<div class="scan"><i class="c a"></i><i class="c b"></i><i class="c d"></i><i class="c e"></i><div class="line"></div><div>${ic('qr')}</div></div><p class="mute" id="vmsg">Align the patient's QR code inside the frame.</p><div class="flex fl-c"><button class="btn" id="vgo">${ic('cam')}Scan QR Code</button><button class="btn ghost" id="upl">${ic('doc')}Upload QR image</button></div><input type="file" id="qrf" accept="image/*" hidden><div class="demo"><b>Demo mode</b><p class="mute" style="font-size:13px;margin:4px 0 10px">No camera? Simulate scanning a fictional patient's QR code.</p><div class="flex">${PATIENTS.map(p=>`<button class="btn sec" data-sim="${p.id}">${p.name.split(' ')[0]} · ${p.id}</button>`).join('')}</div></div>`
+:`<div class="fp" id="fpv">${ic('fp')}</div><p><b>Place finger on biometric scanner</b></p><div class="bar"><i id="pb"></i></div><button class="btn" id="vgo">Verify Patient Biometrics</button>`}</div>
+<p class="mute" style="font-size:13px;margin-top:16px">Simulated verification · no real biometric data is read.</p></div>`},
+rec:()=>{if(!S.patient)return needPt('their record');
+const t=S.tab,T=['Overview','Medical History','Lab Reports','Prescriptions','Current Medications','Allergies'];
+const body={Overview:`<div class="grid2"><div class="card"><h3>Active conditions</h3><ul class="list mt">${P.cond.map(c=>`<li>${ic('steth')}${c}</li>`).join('')}</ul></div><div class="card"><h3>Alerts</h3>${P.alerts.map(a=>`<div class="hl ${a[0]} mt">${a[1]}</div>`).join('')}</div></div>`,
+'Medical History':`<div class="card"><ul class="list">${P.hist.map(h=>`<li><span class="pill" style="min-width:76px;justify-content:center">${h[0]}</span>${h[1]}</li>`).join('')}</ul></div>`,
+'Lab Reports':repCards(),
+Prescriptions:`<div class="card"><table><tr><th>Date</th><th>Medication</th><th>Prescriber</th></tr>${P.rx.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</table></div>`,
+'Current Medications':`<div class="card"><table><tr><th>Medication</th><th>Dose</th><th>For</th></tr>${P.meds.map(m=>`<tr><td><b>${m[0]}</b></td><td>${m[1]}</td><td>${m[2]}</td></tr>`).join('')}</table></div>`,
+Allergies:`<div class="card"><ul class="list">${P.allergies.map(a=>`<li>${ic('warn')}<div><b>${a[0]}</b><div class="mute">${a[1]}</div></div></li>`).join('')}</ul></div>`}[t];
+return patCard()+`<div class="tabs mt" role="tablist">${T.map(x=>`<button class="tab ${x===t?'on':''}" data-tab="${x}">${x}</button>`).join('')}</div><div class="mt">${body}</div>
+<h2 class="mt" style="margin-top:28px">Medical Reports</h2><div class="mt">${repCards()}</div>`},
+pts:()=>S.patient?`<div class="card flex sp"><div class="pt"><div class="av">${ini(P)}</div><div><b>${P.name}</b><div class="mute">${P.id} · ${P.age} · ${P.sex} · ${P.bg}</div></div></div><button class="btn" data-go="rec">Open record</button></div><p class="mute mt">Only patients verified in this session appear here.</p>`:needPt('patient records'),
+reps:()=>S.patient?repCards():needPt('medical reports'),
+sum:()=>{if(!S.patient)return needPt('the AI summary');
+if(S.loading)return `<div class="card"><h3>Generating summary…</h3><div class="skel" style="width:90%"></div><div class="skel" style="width:70%"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:55%"></div></div>`;
+return `<div class="disc">${ic('ai')}AI-generated summary — verify against the original medical report.</div>
+<div class="card mt"><h3>Key Findings</h3><ul class="list mt">${P.sum.f.map(x=>`<li>${ic('check')}${x}</li>`).join('')}</ul></div>
+<div class="grid2 mt"><div class="card"><h3>Important Abnormal Values</h3>${P.sum.a.map(x=>`<div class="hl ${x[0]} mt">${x[1]}</div>`).join('')}</div>
+<div class="card"><h3>Previous Results Comparison</h3><table><tr><th>Test</th><th>Jun 2026</th><th>Sep 2026</th></tr>${P.sum.c.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td></tr>`).join('')}</table></div></div>
+<div class="grid2 mt"><div class="card"><h3>Current Conditions</h3><p class="mute">${P.sum.cond}</p><h3 class="mt">Medication History</h3><p class="mute">${P.sum.medh}</p></div>
+<div class="card"><h3>Items requiring doctor attention</h3><ul class="list mt">${P.sum.att.map(x=>`<li>${ic('warn')}${x}</li>`).join('')}</ul></div></div>
+<div class="flex mt"><button class="btn" data-rep="1">${ic('doc')}View Original Report</button><button class="btn ghost" id="regen">${ic('ai')}Regenerate Summary</button></div>`},
+drug:()=>{if(!S.patient)return needPt('the drug checker');
+const r=S.res;return `<div class="disc">${ic('warn')}AI-generated information is for clinical decision support only. Always verify medication information using authoritative clinical resources.</div>
+<div class="card mt"><h3>Select medications</h3><datalist id="dl">${['Warfarin','Aspirin','Ibuprofen','Atorvastatin','Amlodipine','Metformin','Amoxicillin','Clopidogrel'].map(x=>`<option>${x}</option>`).join('')}</datalist>
+<div class="mt" id="mlist">${S.meds.map((m,i)=>`<div class="mrow"><input list="dl" value="${m}" data-m="${i}" aria-label="Medication ${i+1}" placeholder="Medication ${i+1}">${S.meds.length>2?`<button class="ib" data-rm="${i}" aria-label="Remove">${ic('x')}</button>`:''}</div>`).join('')}</div>
+<div class="flex"><button class="btn ghost" id="addm">+ Add medication</button><button class="btn" id="chk">${ic('ai')}Check Interaction</button><button class="btn ghost" id="clr">Clear</button><button class="btn sec" id="mdet">View Medication Details</button></div></div>
+${S.loading?`<div class="card mt"><h3>Checking interactions…</h3><div class="skel" style="width:80%"></div><div class="skel" style="width:60%"></div></div>`:r?`<div class="card mt"><div class="flex sp"><h2>Medication Interaction Check</h2><span class="pill ${r.sev==='High'?'r':r.sev==='None'?'g':'a'}">${ic('warn')}Severity: ${r.sev}</span></div>${r.items.length?r.items.map(x=>`<div class="hl ${x.c} mt"><b>${x.t}</b><div>${x.d}</div></div>`).join(''):`<div class="hl g mt"><b>No interactions found</b><div>No known interactions in this prototype's sample dataset.</div></div>`}</div>`:`<div class="card mt empty"><div class="ico">${ic('pill')}</div><p class="mute">Add at least two medications, then select Check Interaction.</p></div>`}`}};
+const DB=[[['warfarin','aspirin'],'High','Possible interaction: Warfarin + Aspirin','Combined use may significantly increase bleeding risk. Precaution: consider whether both are needed; monitor INR and watch for bleeding signs.','r'],
+[['warfarin','ibuprofen'],'High','Possible interaction: Warfarin + Ibuprofen','NSAIDs can raise bleeding risk and GI bleeding risk with anticoagulants. Precaution: consider alternatives and monitor closely.','r'],
+[['warfarin','atorvastatin'],'Moderate','Possible interaction: Warfarin + Atorvastatin','May modestly change INR. Precaution: monitor INR when starting or changing dose.','a'],
+[['aspirin','clopidogrel'],'Moderate','Possible interaction: Aspirin + Clopidogrel','Additive antiplatelet effect increases bleeding risk. Precaution: confirm intent of dual therapy.','a'],
+[['aspirin','ibuprofen'],'Moderate','Possible interaction: Aspirin + Ibuprofen','Ibuprofen may reduce aspirin\'s antiplatelet effect and add GI risk.','a']];
+const CLS={aspirin:'NSAID',ibuprofen:'NSAID'};
+function check(){
+ const m=S.meds.map(x=>x.trim().toLowerCase()).filter(Boolean),items=[];let sev='None';const rank={None:0,Moderate:1,High:2};
+ DB.forEach(([p,s,t,d,c])=>{if(p.every(x=>m.includes(x))){items.push({t,d,c});if(rank[s]>rank[sev])sev=s}});
+ const seen={};m.forEach(x=>{if(seen[x]){items.push({t:'Duplicate medication warning',d:x[0].toUpperCase()+x.slice(1)+' was entered more than once.',c:'a'});if(sev==='None')sev='Moderate'}seen[x]=1});
+ const cl={};m.forEach(x=>{if(CLS[x])cl[CLS[x]]=(cl[CLS[x]]||0)+1});Object.keys(cl).forEach(k=>{if(cl[k]>1)items.push({t:'Duplicate therapy class',d:'More than one '+k+' entered. Review whether both are needed.',c:'a'})});
+ if(m.includes('amoxicillin')&&P.allergies.some(a=>a[0]==='Penicillin')){items.push({t:'Allergy-related warning: Penicillin',d:'Amoxicillin is a penicillin-class antibiotic. Patient has a documented penicillin allergy (skin rash).',c:'r'});sev='High'}
+ P.allergies.forEach(a=>{if(a[0]!=='Penicillin'&&m.includes(a[0].toLowerCase())){items.push({t:'Allergy-related warning: '+a[0],d:'Patient has a documented '+a[0].toLowerCase()+' allergy ('+a[1].toLowerCase()+').',c:'r'});sev='High'}})
+ return {sev,items}}
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button,a');if(!t)return;
+ if(t.dataset.lt)setLogin(t.dataset.lt)
+ else if(t.dataset.sim)handleScan(PATIENTS.find(p=>p.id===t.dataset.sim).qr)
+ else if(t.id==='fill'){$('#nmr').value='12345';$('#dn').value='Dr. Meera Nair';$('#pw').value='medtrace';$('#lerr').innerHTML='';$('#lb').focus();toast('Demo credentials filled – now press Login')}
+ else if(t.id==='pfill'){$('#pid').value='MT-10245';$('#ppw').value='patient123';$('#perr').innerHTML='';$('#plb').focus();toast('Demo credentials filled – now press Login')}
+ else if(t.id==='plb')pLogin()
+ else if(t.id==='upl')$('#qrf').click()
+ else if(t.id==='qrdl')dlQR()
+ else if(t.id==='qrbig')dlg(`<h3 class="center">${P.name}</h3><div class="center mt"><div class="qrw"><div style="width:min(300px,70vw)">${qrSvg(P)}</div></div><p><b>${P.id}</b></p></div><button class="btn mt" onclick="dlg0()">Close</button>`)
+ else if(t.dataset.vt){S.vtab=t.dataset.vt;if(S.v!=='verify')S.v='verify';render()}
+ else if(t.dataset.tab){S.tab=t.dataset.tab;render()}
+ else if(t.dataset.act)go(t.dataset.act)
+ else if(t.dataset.rep!==undefined)repDlg(+t.dataset.rep)
+ else if(t.dataset.rm){S.meds.splice(+t.dataset.rm,1);render()}
+ else if(t.id==='vgo')verify(t)
+ else if(t.id==='regen'){S.loading=true;render();setTimeout(()=>{S.loading=false;render();toast('Summary regenerated')},1500)}
+ else if(t.id==='addm'){if(S.meds.length<5){S.meds.push('');render()}}
+ else if(t.id==='clr'){S.meds=['',''];S.res=null;render()}
+ else if(t.id==='chk'){S.meds=[...document.querySelectorAll('[data-m]')].map(i=>i.value);if(S.meds.filter(x=>x.trim()).length<2){toast('Enter at least two medications');return}S.loading=true;S.res=null;render();setTimeout(()=>{S.loading=false;S.res=check();render()},1200)}
+ else if(t.id==='mdet')dlg(`<h3>Medication Details</h3><p class="mute">Sample details for ${P.name}'s current medications:</p><table>${P.meds.map(m=>`<tr><td><b>${m[0]}</b></td><td>${m[1]}</td></tr>`).join('')}</table><div class="disc mt">${ic('warn')}Verify with authoritative clinical resources.</div><button class="btn mt" onclick="dlg0()">Close</button>`)
+ else if(t.id==='bell'&&S.role==='patient')dlg(`<h3>Notifications</h3><ul class="list mt"><li>${ic('qr')}Your QR code is ready to share with your doctor</li><li>${ic('doc')}${P.reps[0][0]} report is available</li></ul><button class="btn mt" onclick="dlg0()">Close</button>`)
+ else if(t.id==='bell')dlg(`<h3>Notifications</h3><ul class="list mt"><li>${ic('shield')}New sign-in from this device</li><li>${ic('doc')}INR report for MT-10245 is ready</li></ul><button class="btn mt" onclick="dlg0()">Close</button>`)
+ else if(t.id==='lo')dlg(`<h3>Log out of MEDTRACE?</h3><p class="mute">Patient data will be cleared from this session.</p><div class="flex"><button class="btn red" id="yes">Log out</button><button class="btn ghost" onclick="dlg0()">Cancel</button></div>`,()=>{$('#yes').onclick=()=>{dlg0();stopCam();S.patient=false;S.res=null;S.v='dash';S.role='doctor';P=A;setLogin('doctor');$('#ppw').value='';$('#app').style.display='none';$('#login').style.display='grid';$('#pw').value='';toast('You have been logged out')}})
+ else if(t.id==='fp'){e.preventDefault();dlg(`<h3>Reset password</h3><p class="mute">In the live product, a reset link is sent to your registered hospital email. Not available in this prototype.</p><button class="btn" onclick="dlg0()">Close</button>`)}
+ else if(t.id==='prof'){}
+});
+function dlg(h,cb){const d=$('#dlg');d.innerHTML=h;hydrate(d);d.showModal();cb&&cb()}function dlg0(){$('#dlg').close()}
+function repDlg(i){const r=P.reps[i];dlg(`<span class="pill">${r[3]}</span><h3 style="margin-top:8px">${r[0]}</h3><p class="mute">${r[1]} · ${r[2]}</p><div class="hl mt">Sample report preview. Values shown are fictional.</div><table class="mt"><tr><th>Parameter</th><th>Result</th><th>Reference</th></tr>${(r[4]||DEF).map(x=>`<tr><td>${x[0]}</td><td><b>${x[1]}</b></td><td>${x[2]}</td></tr>`).join('')}</table><button class="btn mt" onclick="dlg0()">Close</button>`)}
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.append(e);setTimeout(()=>e.remove(),2200)}
+function verify(b){
+ if(S.vtab==='qr'){CAM.on?stopCam():startCam();return}
+ b.disabled=true;const body=$('#vbody');
+ if(S.vtab==='bio'){$('#fpv').classList.add('go');let p=0;const iv=setInterval(()=>{p+=8;$('#pb').style.width=Math.min(p,100)+'%';if(p>=100){clearInterval(iv);done()}},150)}
+ else{b.textContent='Scanning…';setTimeout(done,1800)}
+ function done(){body.innerHTML=`<div class="ok">${ic('check')}</div><h2>Patient Identified Successfully</h2><p class="mute">Opening medical record…</p>`;S.patient=true;P=A;S.last=A;S.lastD='Just now';S.res=null;setTimeout(()=>{S.tab='Overview';go('rec')},1400)}
+}
+$('#lb').onclick=()=>{
+ const n=$('#nmr').value.trim(),d=$('#dn').value.trim().toLowerCase().replace(/\./g,''),p=$('#pw').value;
+ if(n==='12345'&&d==='dr meera nair'&&p==='medtrace'){$('#lerr').innerHTML='';$('#login').style.display='none';$('#app').style.display='block';go('dash');toast('Welcome, Dr. Meera Nair')}
+ else $('#lerr').innerHTML=`<div class="err" role="alert">${ic('warn')}Invalid NMR No., name, or password</div>`;hydrate($('#lerr'))};
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('#login').style.display!=='none'&&e.target.tagName==='INPUT')(e.target.closest('#fpat')?$('#plb'):$('#lb')).click()});
+V.prof=()=>`<div class="card pt"><div class="av">MN</div><div><h2>Dr. Meera Nair</h2><div class="mute">NMR 12345 · General Medicine</div><span class="pill g">${ic('shield')}Verified practitioner</span></div></div><div class="card mt"><h3>Session security</h3><ul class="list mt"><li>${ic('lock')}Secure Session active</li><li>${ic('shield')}Patient data encrypted</li><li>${ic('doc')}Every record access is logged</li></ul></div>`;
+
+const ini=p=>p.name.split(' ').map(w=>w[0]).join('');
+function qrSvg(p){const m=p.qm,n=m.length;let d='';m.forEach((r,y)=>{for(let x=0;x<n;x++)if(r[x]==='1')d+=`M${x+4} ${y+4}h1v1h-1z`});return `<svg viewBox="0 0 ${n+8} ${n+8}" role="img" aria-label="QR code for ${p.id}" shape-rendering="crispEdges"><rect width="${n+8}" height="${n+8}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`}
+function dlQR(){const p=P,m=p.qm,n=m.length,s=16,c=document.createElement('canvas');c.width=c.height=(n+8)*s;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';m.forEach((r,j)=>{for(let i=0;i<n;i++)if(r[i]==='1')x.fillRect((i+4)*s,(j+4)*s,s,s)});c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='MEDTRACE-QR-'+p.id+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)})}
+V.pprof=()=>{const p=P;return `<div class="card"><div class="pt"><div class="av">${ini(p)}</div><div style="flex:1;min-width:180px"><h2>${p.name}</h2><span class="pill">${ic('user')}Patient portal</span></div></div><div class="facts"><div><small>Patient ID</small><b>${p.id}</b></div><div><small>Age</small><b>${p.age}</b></div><div><small>Gender</small><b>${p.sex}</b></div><div><small>Blood Group</small><b>${p.bg}</b></div><div><small>Last Visit</small><b>${p.last}</b></div></div></div>
+<div class="grid2 mt"><div class="card center"><h3>My QR Code</h3><p class="mute" style="font-size:14px">Show this code to your doctor so they can open your record. It is unique to you.</p><div class="qrw">${qrSvg(p)}</div><div style="margin:8px 0"><b>${p.id}</b></div><div class="flex fl-c"><button class="btn" id="qrdl">${ic('doc')}Download QR</button><button class="btn ghost" id="qrbig">View larger</button></div></div>
+<div class="card"><h3>Allergies</h3><ul class="list mt">${p.allergies.map(a=>`<li>${ic('warn')}<div><b>${a[0]}</b><div class="mute">${a[1]}</div></div></li>`).join('')}</ul></div></div>
+<div class="card mt"><h3>Current Medications</h3><table><tr><th>Medication</th><th>Dose</th><th>For</th></tr>${p.meds.map(m=>`<tr><td><b>${m[0]}</b></td><td>${m[1]}</td><td>${m[2]}</td></tr>`).join('')}</table></div>
+<div class="card mt"><h3>Medical History</h3><ul class="list mt">${p.hist.map(h=>`<li><span class="pill" style="min-width:76px;justify-content:center">${h[0]}</span>${h[1]}</li>`).join('')}</ul></div>
+<h2 style="margin-top:28px">Medical Reports</h2><div class="mt">${repCards()}</div>`};
+V.preps=()=>repCards();
+function setLogin(r){const d=r==='doctor';$('#fdoc').hidden=!d;$('#fpat').hidden=d;$('#ltd').classList.toggle('on',d);$('#ltp').classList.toggle('on',!d)}
+function pLogin(){const p=PATIENTS.find(x=>x.id===$('#pid').value.trim().toUpperCase());
+ if(p&&$('#ppw').value==='patient123'){$('#perr').innerHTML='';S.role='patient';P=p;$('#login').style.display='none';$('#app').style.display='block';go('pprof');toast('Welcome, '+p.name.split(' ')[0])}
+ else{$('#perr').innerHTML=`<div class="err" role="alert">${ic('warn')}Invalid Patient ID or password</div>`;hydrate($('#perr'))}}
+const CAM={on:false,s:null,raf:0,bd:null};
+function stopCam(){CAM.on=false;cancelAnimationFrame(CAM.raf);if(CAM.s){CAM.s.getTracks().forEach(t=>t.stop());CAM.s=null}const v=$('#cam');if(v)v.remove();const b=$('#vgo');if(b&&S.vtab==='qr')b.innerHTML=ic('cam')+'Scan QR Code'}
+const vmsg=h=>{const m=$('#vmsg');if(m)m.innerHTML=h};
+async function readQR(src,w,h){const cv=document.createElement('canvas'),k=Math.min(1,720/Math.max(w,h));cv.width=Math.round(w*k);cv.height=Math.round(h*k);const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,cv.width,cv.height);
+ try{if('BarcodeDetector' in window){CAM.bd=CAM.bd||new BarcodeDetector({formats:['qr_code']});const r=await CAM.bd.detect(cv);if(r.length)return r[0].rawValue}}catch(e){}
+ if(window.jsQR){const d=x.getImageData(0,0,cv.width,cv.height),r=jsQR(d.data,d.width,d.height);if(r)return r.data}
+ return null}
+async function startCam(){
+ const alt='Use <b>Upload QR image</b> or the demo scan below.';
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){vmsg('Camera is not available here. '+alt);return}
+ try{CAM.s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false})}catch(e){vmsg('Camera permission was not granted. '+alt);return}
+ const f=$('.scan');if(!f||S.v!=='verify'){stopCam();return}
+ const v=document.createElement('video');v.id='cam';v.muted=true;v.setAttribute('playsinline','');v.srcObject=CAM.s;f.prepend(v);await v.play().catch(()=>{});
+ $('#vgo').innerHTML=ic('x')+'Stop camera';vmsg('Point the camera at the patient\'s QR code…');CAM.on=true;
+ const tick=async()=>{if(!CAM.on)return;if(v.videoWidth){const t=await readQR(v,v.videoWidth,v.videoHeight);if(t&&CAM.on&&handleScan(t))return}if(CAM.on)CAM.raf=requestAnimationFrame(tick)};tick()}
+function handleScan(t){const p=PATIENTS.find(x=>x.qr===String(t).trim());
+ if(!p){vmsg('<span style="color:var(--red);font-weight:700">Not a registered MEDTRACE patient QR code.</span>');return false}
+ stopCam();P=p;S.last=p;S.lastD='Just now';S.res=null;S.patient=true;
+ const b=$('#vbody');if(b)b.innerHTML=`<div class="ok">${ic('check')}</div><h2>Patient Identified Successfully</h2><p class="mute">${p.name} · ${p.id}<br>Opening medical record…</p>`;
+ setTimeout(()=>{S.tab='Overview';go('rec')},1400);return true}
+document.addEventListener('change',e=>{if(e.target.id!=='qrf'||!e.target.files[0])return;const im=new Image(),u=URL.createObjectURL(e.target.files[0]);im.onload=async()=>{const t=await readQR(im,im.naturalWidth,im.naturalHeight);URL.revokeObjectURL(u);if(t)handleScan(t);else vmsg('No readable QR code found in that image.')};im.src=u;e.target.value=''});
+hydrate();
+</script>
+</body></html>
